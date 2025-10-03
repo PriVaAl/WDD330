@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipe Finder & Nutrition Tracker</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <img src="images/logo.jpeg" alt="Logo" />
+      <span>Recipe Finder</span>
+    </div>
+
+    <nav class="desktop-nav">
+      <a href="#">Home</a>
+      <a href="#">Favorites</a>
+    </nav>
+
+    <button class="hamburger" aria-label="Menu">&#9776;</button>
+  </header>
+
+  <!-- Search Section -->
+  <section id="search-section">
+    <input type="text" id="ingredient-input" placeholder="Enter ingredients or recipe name">
+    <button id="search-btn">Search Recipes</button>
+
+    <div id="filters">
+      <label><input type="checkbox"> Vegetarian</label>
+      <label><input type="checkbox"> Vegan</label>
+      <label><input type="checkbox"> Gluten-free</label>
+      <label><input type="checkbox"> Low-calorie</label>
+    </div>
+  </section>
+
+  <!-- Recipe Results -->
+  <section id="results-section">
+    <ul id="recipes">
+      <!-- Recipe cards inserted dynamically -->
+    </ul>
+  </section>
+
+  <!-- Recipe Details Section -->
+  <section id="details-section">
+    <!-- Populated dynamically when a recipe is clicked -->
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <a href="#">About</a> | 
+    <a href="#">Contact</a> | 
+    <a href="#">API Acknowledgments</a>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
