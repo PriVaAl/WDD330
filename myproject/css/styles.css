@@ -178,6 +178,21 @@ body {
   @media (max-width: 768px) {
     nav.desktop-nav {
       display: none;
+      flex-direction: column;
+      background-color: #ff7f50;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    nav.desktop-nav.open {
+      display: flex;
+    }
+  
+    nav.desktop-nav a {
+      margin: 5px 0;
+      color: #fff;
     }
   
     button.hamburger {
@@ -200,6 +215,7 @@ body {
     #filters {
       flex-direction: column;
       gap: 5px;
+      width:100%;
     }
   
     .recipe-image {

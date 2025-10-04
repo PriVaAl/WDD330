@@ -5,11 +5,18 @@ const searchBtn = document.getElementById('search-btn');
 const ingredientInput = document.getElementById('ingredient-input');
 const recipesList = document.getElementById('recipes');
 const detailsSection = document.getElementById('details-section');
+const hamburger = document.querySelector('.hamburger');
+const desktopNav = document.querySelector('.desktop-nav');
+const filters = document.querySelectorAll('#filters input[type="checkbox"]');
 
+let currentRecipes = []; // Store last fetched recipes
 
-const viewCounter = (() => { let count = 0; return () => ++count; })();
+// Hamburger menu toggle
+hamburger.addEventListener('click', () => {
+  desktopNav.classList.toggle('open');
+});
 
-
+// Search recipes
 searchBtn.addEventListener('click', async () => {
   const query = ingredientInput.value.trim();
   if (!query) {
@@ -23,13 +30,35 @@ searchBtn.addEventListener('click', async () => {
       alertMessage('No recipes found.');
       return;
     }
+    currentRecipes = recipes;
     displayRecipes(recipes);
   } catch (error) {
     alertMessage('Error fetching recipes. Please try again.');
   }
 });
 
+// Apply dietary filters
+filters.forEach(f => f.addEventListener('change', applyFilters));
 
+function applyFilters() {
+  const activeFilters = Array.from(filters)
+    .filter(f => f.checked)
+    .map(f => f.parentElement.textContent.trim().toLowerCase());
+
+  const filteredRecipes = currentRecipes.filter(recipe => {
+    return activeFilters.every(filter => {
+      if (filter === 'vegetarian') return recipe.vegetarian;
+      if (filter === 'vegan') return recipe.vegan;
+      if (filter === 'gluten-free') return recipe.glutenFree;
+      if (filter === 'low-calorie') return recipe.calories ? recipe.calories < 400 : true;
+      return true;
+    });
+  });
+
+  displayRecipes(filteredRecipes);
+}
+
+// Display recipes in grid/list
 function displayRecipes(recipes) {
   recipesList.innerHTML = '';
   recipes.forEach(recipe => {
@@ -47,9 +76,14 @@ function displayRecipes(recipes) {
   });
 }
 
+// Recipe view counter
+const viewCounter = (() => { let count = 0; return () => ++count; })();
+
+// Display recipe details
 async function displayRecipeDetails(recipe) {
   detailsSection.innerHTML = `
     <h2>${recipe.title}</h2>
+    <p>Servings: ${recipe.servings || 'N/A'}</p>
     <img src="${recipe.image}" alt="${recipe.title}" class="recipe-image">
     <p>You have viewed ${viewCounter()} recipes</p>
     <button id="fav-btn">Add to Favorites</button>
@@ -58,12 +92,15 @@ async function displayRecipeDetails(recipe) {
     <div id="nutrition-info" class="collapsible">Loading nutrition info...</div>
 
     <button class="toggle-btn" data-target="ingredient-details">Show/Hide Ingredient Details</button>
-    <div id="ingredient-details" class="collapsible"></div>
+    <div id="ingredient-details" class="collapsible">
+      <h3>Ingredients</h3>
+      <ul id="ingredient-list"></ul>
+    </div>
   `;
 
   document.getElementById('fav-btn').addEventListener('click', () => saveFavorite(recipe));
 
-  
+  // Toggle collapsible sections
   document.querySelectorAll('.toggle-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const section = document.getElementById(btn.dataset.target);
@@ -71,10 +108,11 @@ async function displayRecipeDetails(recipe) {
     });
   });
 
-  
+  // Nutrition info
   const nutritionData = await fetchNutrition(recipe);
+  const nutritionDiv = document.getElementById('nutrition-info');
   if (nutritionData) {
-    document.getElementById('nutrition-info').innerHTML = `
+    nutritionDiv.innerHTML = `
       <h3>Nutrition</h3>
       <ul>
         <li>Calories: ${nutritionData.calories || 'N/A'}</li>
@@ -84,25 +122,19 @@ async function displayRecipeDetails(recipe) {
       </ul>
     `;
   } else {
-    document.getElementById('nutrition-info').textContent = 'Nutrition info not available.';
+    nutritionDiv.textContent = 'Nutrition info not available.';
   }
 
   // Ingredient details (first 3 ingredients)
-  if (recipe.extendedIngredients?.length > 0) {
-    const ingredientDiv = document.getElementById('ingredient-details');
-    ingredientDiv.innerHTML = `<h3>Ingredient Details</h3>`;
-    for (let i = 0; i < Math.min(3, recipe.extendedIngredients.length); i++) {
-      const ingrName = recipe.extendedIngredients[i].original;
-      const details = await fetchIngredientDetails(ingrName);
-      if (details) {
-        const p = document.createElement('p');
-        p.textContent = `${details.label} — Calories: ${details.nutrients.ENERC_KCAL || 'N/A'}, Protein: ${details.nutrients.PROCNT || 'N/A'}g`;
-        ingredientDiv.appendChild(p);
-      }
-    }
-  }
+  const ingredientList = document.getElementById('ingredient-list');
+  recipe.extendedIngredients?.forEach(ing => {
+    const li = document.createElement('li');
+    li.textContent = ing.original;
+    ingredientList.appendChild(li);
+  });
 }
 
+// Display saved favorites
 export function displayFavorites() {
   const favorites = getFavorites();
   recipesList.innerHTML = '';
