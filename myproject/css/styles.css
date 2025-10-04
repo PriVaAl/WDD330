@@ -1,11 +1,10 @@
-/* Reset & basic styles */
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
     line-height: 1.5;
   }
   
-  /* Header */
   header {
     display: flex;
     justify-content: space-between;
@@ -128,7 +127,7 @@ body {
     font-size: 14px;
   }
   
-  /* Recipe Details */
+ 
   .recipe-image {
     width: 100%;
     max-width: 500px;
@@ -148,7 +147,7 @@ body {
   }
   
   .collapsible.open {
-    max-height: 500px; /* enough to show content */
+    max-height: 500px; 
     padding: 10px;
   }
   
@@ -162,12 +161,12 @@ body {
     cursor: pointer;
   }
   
-  /* Ingredients list styling */
+ 
   #ingredient-details p {
     margin: 5px 0;
   }
   
-  /* Footer */
+  
   footer {
     text-align: center;
     padding: 15px;
@@ -175,7 +174,7 @@ body {
     color: #fff;
   }
   
-  /* Responsive - Mobile */
+  
   @media (max-width: 768px) {
     nav.desktop-nav {
       display: none;

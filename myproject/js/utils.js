@@ -1,6 +1,4 @@
-// utils.js
 
-// Create alert messages dynamically
 export function alertMessage(message, scroll = true) {
     const alert = document.createElement('div');
     alert.classList.add('alert');
@@ -19,7 +17,7 @@ export function alertMessage(message, scroll = true) {
     if (scroll) window.scrollTo(0, 0);
   }
   
-  // Favorites storage
+  
   export function saveFavorite(recipe) {
     const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
     if (!favorites.some(r => r.id === recipe.id)) {

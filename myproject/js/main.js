@@ -6,10 +6,10 @@ const ingredientInput = document.getElementById('ingredient-input');
 const recipesList = document.getElementById('recipes');
 const detailsSection = document.getElementById('details-section');
 
-// Closure to track recipe views
+
 const viewCounter = (() => { let count = 0; return () => ++count; })();
 
-// Search button click
+
 searchBtn.addEventListener('click', async () => {
   const query = ingredientInput.value.trim();
   if (!query) {
@@ -29,7 +29,7 @@ searchBtn.addEventListener('click', async () => {
   }
 });
 
-// Display recipe list
+
 function displayRecipes(recipes) {
   recipesList.innerHTML = '';
   recipes.forEach(recipe => {
@@ -47,7 +47,6 @@ function displayRecipes(recipes) {
   });
 }
 
-// Display recipe details
 async function displayRecipeDetails(recipe) {
   detailsSection.innerHTML = `
     <h2>${recipe.title}</h2>
@@ -64,7 +63,7 @@ async function displayRecipeDetails(recipe) {
 
   document.getElementById('fav-btn').addEventListener('click', () => saveFavorite(recipe));
 
-  // Toggle buttons
+  
   document.querySelectorAll('.toggle-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const section = document.getElementById(btn.dataset.target);
@@ -72,7 +71,7 @@ async function displayRecipeDetails(recipe) {
     });
   });
 
-  // Fetch nutrition info
+  
   const nutritionData = await fetchNutrition(recipe);
   if (nutritionData) {
     document.getElementById('nutrition-info').innerHTML = `
@@ -104,7 +103,6 @@ async function displayRecipeDetails(recipe) {
   }
 }
 
-// Display favorites (optional)
 export function displayFavorites() {
   const favorites = getFavorites();
   recipesList.innerHTML = '';
