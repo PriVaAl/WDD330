@@ -8,16 +8,23 @@ const EDAMAM_FOOD_URL = 'https://api.edamam.com/api/food-database/v2/parser';
 const EDAMAM_APP_ID = 'c69da11d';
 const EDAMAM_APP_KEY = '4289a8d1b70671486bc74edfc2d5a850';
 
+// Nutritionix 
+const NUTRITIONIX_URL = 'https://trackapi.nutritionix.com/v2/natural/nutrients';
+const NUTRITIONIX_APP_ID = 'c4bb1bf9';
+const NUTRITIONIX_APP_KEY = '245e71af9fc372bdeac923b85c56e27e';
 
-function cleanIngredients(rawIngredients) {
+export function cleanIngredients(rawIngredients) {
   return rawIngredients
-    .map(i => (i.original ? i.original : `${i.amount} ${i.unit} ${i.name}`))
-    .map(str => str.replace(/\(.*?\)/g, "").trim())        
-    .filter(str => str && !/bone|garnish|water/i.test(str)) 
-    .filter(str => !/to taste/i.test(str))                  
-    .filter(str => !/^salt and pepper$/i.test(str))        
-    .filter(str => /\d/.test(str));                        
+    .map(i => i.original || `${i.amount} ${i.unit} ${i.name}`)
+    .map(str => str.replace(/\(.*?\)/g, ""))                 
+    .map(str => str.replace(/optional:/gi, ""))              
+    .map(str => str.replace(/not drained/gi, ""))            
+    .map(str => str.replace(/-/, " "))                       
+    .map(str => str.trim())
+    .filter(str => str && !/bone|garnish|water/i.test(str))  
+    .filter(str => /\d/.test(str));                          
 }
+
 
 
 export async function fetchRecipes(query) {
@@ -48,53 +55,76 @@ export async function fetchRecipeDetails(id) {
 export async function fetchNutrition(recipe) {
   try {
     if (!recipe?.extendedIngredients || recipe.extendedIngredients.length === 0) {
-      console.warn("Recipe has no ingredients:", recipe);
       return null;
     }
 
-    
     const ingredients = cleanIngredients(recipe.extendedIngredients);
+    if (ingredients.length === 0) return null;
 
-    if (ingredients.length === 0) {
-      console.warn("No valid ingredients for nutrition analysis after cleaning:", recipe);
-      return null;
-    }
+    console.log("Ingredients sent to Nutritionix:", ingredients);
 
-    console.log("Ingredients sent to Edamam:", ingredients);
+    // Build a single query string with all ingredients (max 50 items)
+    const queryString = ingredients.join(", ");
 
-    const response = await fetch(
-      `${EDAMAM_NUTRITION_URL}?app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: recipe.title || "Untitled Recipe",
-          yield: recipe.servings || 1,
-          ingr: ingredients,
-        }),
-      }
-    );
+    const response = await fetch(NUTRITIONIX_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-app-id": NUTRITIONIX_APP_ID,
+        "x-app-key": NUTRITIONIX_APP_KEY
+      },
+      body: JSON.stringify({ query: queryString })
+    });
 
     if (!response.ok) {
-      console.error("Nutrition API error:", response.status, await response.text());
+      console.error("Nutritionix API error:", response.status, await response.text());
       return null;
     }
 
     const data = await response.json();
-    return data;
+
+    // Sum nutrients across all returned items
+    let totalCalories = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
+    if (!data.foods || data.foods.length === 0) return null;
+
+    data.foods.forEach(f => {
+      totalCalories += f.nf_calories || 0;
+      totalProtein += f.nf_protein || 0;
+      totalFat += f.nf_total_fat || 0;
+      totalCarbs += f.nf_total_carbohydrate || 0;
+    });
+
+    return {
+      calories: totalCalories.toFixed(0),
+      protein: totalProtein.toFixed(1),
+      fat: totalFat.toFixed(1),
+      carbs: totalCarbs.toFixed(1)
+    };
 
   } catch (error) {
     console.error("Error fetching nutrition:", error);
-    return null;
+    return { calories: "N/A", protein: "N/A", fat: "N/A", carbs: "N/A" };
   }
 }
 
 
+
+
 export async function fetchIngredientDetails(ingredient) {
   try {
-    const response = await fetch(`${EDAMAM_FOOD_URL}?ingr=${encodeURIComponent(ingredient)}&app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}`);
+    const response = await fetch(NUTRITIONIX_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-app-id": NUTRITIONIX_APP_ID,
+        "x-app-key": NUTRITIONIX_APP_KEY
+      },
+      body: JSON.stringify({ query: ingredient })
+    });
+
     const data = await response.json();
-    return data.hints[0]?.food || null;
+    return data.foods?.[0] || null;
+
   } catch (error) {
     console.error('Error fetching ingredient:', error);
     return null;

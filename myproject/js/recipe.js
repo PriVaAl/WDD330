@@ -30,33 +30,33 @@ async function loadRecipe(id) {
       return;
     }
 
-    // ✅ Populate header section
+    //  Populate header section
     titleEl.textContent = recipe.title;
     imageEl.src = recipe.image;
     imageEl.alt = recipe.title;
     servingsEl.textContent = `Servings: ${recipe.servings || "N/A"}`;
 
-    // ✅ Populate ingredients list
+    //  Populate ingredients list
     ingredientsList.innerHTML =
       recipe.extendedIngredients
         ?.map(i => `<li>${i.original}</li>`)
         .join("") || "<li>No ingredients available.</li>";
 
-    // ✅ Populate instructions
+    //  Populate instructions
     instructionsEl.textContent =
       recipe.instructions || "Instructions not available.";
 
-    // ✅ Hook up "Add to Favorites" button
+    //  Hook up "Add to Favorites" button
     favBtn.addEventListener("click", () => saveFavorite(recipe));
 
-    // ✅ Fetch nutrition info from Edamam
+    //  Fetch nutrition info from Edamam
     const nutrition = await fetchNutrition(recipe);
 
     if (nutrition && nutrition.calories) {
-      caloriesEl.textContent = `${nutrition.calories.toFixed(0)}`;
-      proteinEl.textContent = `${nutrition.totalNutrients?.PROCNT?.quantity?.toFixed(1) || "N/A"} g`;
-      fatEl.textContent = `${nutrition.totalNutrients?.FAT?.quantity?.toFixed(1) || "N/A"} g`;
-      carbsEl.textContent = `${nutrition.totalNutrients?.CHOCDF?.quantity?.toFixed(1) || "N/A"} g`;
+      caloriesEl.textContent = nutrition.calories;
+proteinEl.textContent = nutrition.protein + " g";
+fatEl.textContent = nutrition.fat + " g";
+carbsEl.textContent = nutrition.carbs + " g";
     } else {
       caloriesEl.textContent = "N/A";
       proteinEl.textContent = "N/A";
@@ -69,3 +69,9 @@ async function loadRecipe(id) {
     titleEl.textContent = "Error loading recipe. Please try again.";
   }
 }
+const hamburger = document.querySelector(".hamburger");
+const navMenu = document.querySelector(".desktop-nav");
+
+hamburger.addEventListener("click", () => {
+  navMenu.classList.toggle("open");
+});

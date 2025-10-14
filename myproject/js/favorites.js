@@ -14,7 +14,7 @@ function renderFavorites() {
 
   favorites.forEach(recipe => {
     const li = document.createElement('li');
-    li.className = 'favorites-card'; // Use the new CSS class for styling
+    li.className = 'favorites-card'; 
     li.innerHTML = `
       <img src="${recipe.image}" alt="${recipe.title}">
       <h2>${recipe.title}</h2>
@@ -39,3 +39,10 @@ function renderFavorites() {
     list.appendChild(li);
   });
 }
+
+const hamburger = document.querySelector(".hamburger");
+const navMenu = document.querySelector(".desktop-nav");
+
+hamburger.addEventListener("click", () => {
+  navMenu.classList.toggle("open");
+});
